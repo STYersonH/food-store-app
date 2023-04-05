@@ -1,35 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import { CreateContainer, Header, MainContainer } from "./components";
+import { AnimatePresence } from "framer-motion";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { useStateValue } from "./context/StateProvider";
+import { getAllFoodItems } from "./utils/firebaseFunctions";
+import { useEffect } from "react";
+import { actionType } from "./context/reducer";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [{ foodItems }, dispatch] = useStateValue();
+
+  const fetchData = async () => {
+    /*await getAllFoodItems().then((data) => {
+      console.log(data);
+    });*/
+
+    const data = await getAllFoodItems();
+    //console.log(data);
+    dispatch({
+      type: actionType.SET_FOOD_ITEMS,
+      foodItems: data,
+    });
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
-  )
+    <BrowserRouter>
+      <AnimatePresence>
+        <div className="w-screen h-auto flex flex-col bg-primary">
+          <Header />
+
+          <main className="mt-16 md:mt-20 px-4 md:px-16 py-4 w-full">
+            <Routes>
+              <Route path="/" element={<MainContainer />} />
+              <Route path="/createItem" element={<CreateContainer />} />
+            </Routes>
+          </main>
+        </div>
+      </AnimatePresence>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
